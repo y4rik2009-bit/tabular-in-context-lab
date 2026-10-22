@@ -1,16 +1,14 @@
-# Tabular in-context learning, built from scratch
+# In-context learning for small tabular tasks
 
-**Independent research project · binary classification · PyTorch · inspired by ICML 2025 TabICL**
+I wanted to test a simple version of a surprising idea: can a model see a few labeled rows from a new table and predict the next row **without training again**? The [TabICL paper](https://proceedings.mlr.press/v267/qu25d.html) (ICML 2025) was the starting point. Here a small PyTorch model practices on generated binary-classification tasks, then reads 32 labeled examples from each real dataset. Logistic Regression, 5-NN and CatBoost get the same examples for comparison.
 
-Can a single model learn from a new table **without updating its weights**? This project builds a small in-context learner that first practices on synthetic classification tasks and then uses labeled rows of an unseen real table as context. It compares with Logistic Regression and CatBoost trained on exactly the same 32 labeled rows.
+This is a CPU-sized experiment with its own architecture and training data. It does not use the paper's code or pretrained weights, and its results are not directly comparable with the paper's large-scale benchmark.
 
-The research inspiration is [Qu et al., *TabICL: A Tabular Foundation Model for In-Context Learning on Large Data* (ICML 2025)](https://proceedings.mlr.press/v267/qu25d.html). The original system was pretrained at a very different scale and supports much larger datasets. **This code and its weights are an independent CPU-scale experiment, not the official TabICL model and not a paper reproduction.**
-
-## What I implemented
+## How it works
 
 - A generator of synthetic tabular tasks with linear, interacting, radial, and periodic class boundaries ([prior.py](prior.py)).
 - A three-stage PyTorch network: attention within each feature column, within each row, and across labeled context rows and hidden-label query rows ([miniicl.py](miniicl.py)).
-- A learned local attention path over similar context examples. I added this inductive bias because short CPU pretraining alone was insufficient; it is **my design choice**, not a component claimed from the paper.
+- A learned local attention path over similar context examples. Short CPU pretraining with attention alone was too weak in this experiment, so this version also gives the model a way to look at nearby examples. That addition is specific to this repo, not a component claimed from the paper.
 - Strict masking so no query label enters a forward pass, and no query can read a different query.
 - A frozen-weight evaluation on three real [UCI](https://archive.ics.uci.edu/) classification datasets, with equal context and test rows for every method, train-only preprocessing, three seeds, and ablations for random weights and shuffled context labels ([benchmark.py](benchmark.py)).
 
@@ -30,7 +28,7 @@ The shuffled-context diagnostic preserves the class counts but mismatches contex
 
 ## Results
 
-The benchmark numbers below come from completed local runs, averaged over three splits. The [per-split records](results/verified/metrics.csv), [aggregated values](results/verified/summary.csv), [pretraining manifest](results/verified/training_manifest.json), and [benchmark manifest](results/verified/run.json) are included so the claims can be checked.
+These numbers come from three completed splits, not from the paper. The [per-split records](results/verified/metrics.csv), [averages](results/verified/summary.csv), [pretraining settings](results/verified/training_manifest.json), and [benchmark settings](results/verified/run.json) are saved with the code.
 
 | Dataset | MiniTabICL AUC | Logistic AUC | 5-NN AUC | CatBoost AUC | MiniTabICL log loss | Random-weight log loss |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -42,7 +40,7 @@ The benchmark numbers below come from completed local runs, averaged over three 
 
 ![Effect of pretraining and correct context labels on AUC](figures/ablations.svg)
 
-The pretrained model's log loss was lower than the same architecture with random weights on **all three datasets**. Its AUC improved on Breast Cancer and Ionosphere but slipped from **0.932 to 0.919** on Banknote. Shuffling the context labels reduced mean AUC from **0.919 to 0.555**, **0.992 to 0.338**, and **0.865 to 0.404** respectively: the network is using the relation between features and labels. This diagnostic is not a substitute for comparison with strong baselines. Logistic Regression leads on Banknote AUC; CatBoost leads on Ionosphere AUC; the Breast Cancer AUC values for MiniTabICL and CatBoost round to the same three decimals. These tiny differences across only three splits do not establish a winner.
+Pretraining lowered log loss versus random weights on **all three datasets**. AUC improved on Breast Cancer and Ionosphere but slipped from **0.932 to 0.919** on Banknote. With the 32 context labels shuffled, mean AUC fell from **0.919 to 0.555**, **0.992 to 0.338**, and **0.865 to 0.404**. So the model uses which label belongs to which row, rather than only the class balance. Still, Logistic Regression has the best Banknote AUC, CatBoost has the best Ionosphere AUC, and the Breast Cancer results are nearly tied. Three splits are not enough to declare an overall winner.
 
 5-NN achieved low log loss on Banknote but a high log loss on Ionosphere (mean **1.521**); near-zero or near-one probabilities are penalized sharply when wrong. The complete log loss, Brier score, accuracy, per-seed results and timings are in the linked files.
 
@@ -77,4 +75,5 @@ The benchmark does **not** download the authors' pretrained checkpoint. The enti
 - Training time for CatBoost and Logistic Regression is included in their measured wall time; the in-context model's time covers prediction after its separate pretraining. Compare these timings with that distinction in mind.
 - Raw UCI data are not committed. The small checkpoint was generated by this repository's training script and is included for immediate evaluation; load only checkpoints you trust. Dataset pages identify their CC BY 4.0 licenses; this repository's original code is MIT licensed.
 
-Built by [@y4rik2009-bit](https://github.com/y4rik2009-bit). Research inspiration: [TabICL paper](https://proceedings.mlr.press/v267/qu25d.html) and [official code](https://github.com/soda-inria/tabicl).
+Research references: [TabICL paper](https://proceedings.mlr.press/v267/qu25d.html) and [official code](https://github.com/soda-inria/tabicl).
+
