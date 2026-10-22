@@ -1,0 +1,71 @@
+{
+  "config": {
+    "steps": 1200,
+    "batch_size": 16,
+    "context": 32,
+    "query": 8,
+    "features": 10,
+    "width": 32,
+    "seed": 42,
+    "threads": 4,
+    "out": "artifacts/model.pt"
+  },
+  "wall_seconds": 115.02,
+  "torch": "2.12.0+cpu",
+  "numpy": "2.4.4",
+  "python": "3.12.10",
+  "history": [
+    {
+      "step": 1,
+      "training_loss": 0.713234
+    },
+    {
+      "step": 100,
+      "training_loss": 0.613901
+    },
+    {
+      "step": 200,
+      "training_loss": 0.615822
+    },
+    {
+      "step": 300,
+      "training_loss": 0.650151
+    },
+    {
+      "step": 400,
+      "training_loss": 0.642163
+    },
+    {
+      "step": 500,
+      "training_loss": 0.677419
+    },
+    {
+      "step": 600,
+      "training_loss": 0.647818
+    },
+    {
+      "step": 700,
+      "training_loss": 0.628761
+    },
+    {
+      "step": 800,
+      "training_loss": 0.57539
+    },
+    {
+      "step": 900,
+      "training_loss": 0.627917
+    },
+    {
+      "step": 1000,
+      "training_loss": 0.644003
+    },
+    {
+      "step": 1100,
+      "training_loss": 0.594972
+    },
+    {
+      "step": 1200,
+      "training_loss": 0.613161
+    }
+  ]
+}

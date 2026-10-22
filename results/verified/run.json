@@ -1,0 +1,27 @@
+{
+  "args": {
+    "checkpoint": "artifacts/model.pt",
+    "datasets": [
+      "banknote",
+      "breast_original",
+      "ionosphere"
+    ],
+    "seeds": [
+      42,
+      123,
+      2024
+    ],
+    "context": 32,
+    "max_test": 100,
+    "features": 10,
+    "threads": 4
+  },
+  "wall_seconds": 7.61,
+  "python": "3.12.10",
+  "torch": "2.12.0+cpu",
+  "numpy": "2.4.4",
+  "pandas": "3.0.3",
+  "sklearn": "1.5.2",
+  "note": "Training uses only synthetic tasks. Each UCI split supplies context labels; no test label fits preprocessing or models.",
+  "catboost": "1.2.10"
+}
